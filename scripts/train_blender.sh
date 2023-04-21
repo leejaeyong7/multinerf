@@ -17,8 +17,10 @@ export CUDA_VISIBLE_DEVICES=0
 
 SCENE=ficus
 EXPERIMENT=blender
-DATA_DIR=/usr/local/google/home/barron/tmp/nerf_data/nerf_synthetic
-CHECKPOINT_DIR=/usr/local/google/home/barron/tmp/nerf_results/"$EXPERIMENT"/"$SCENE"
+TRAIN_DIR=/media/storage1/jae/mipnerf_results/$EXPERIMENT/$SCENE
+DATA_DIR=/media/storage1/nerf_synthetic/$SCENE
+CHECKPOINT_DIR=/media/storage1/jae/mipnerf_checkpoints/$EXPERIMENT/$SCENE
+mkdir -p CHECKPOINT_DIR
 
 rm "$CHECKPOINT_DIR"/*
 python -m train \

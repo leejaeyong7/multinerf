@@ -43,6 +43,7 @@ import pycolmap
 def load_dataset(split, train_dir, config):
   """Loads a split of a dataset using the data_loader specified by `config`."""
   dataset_dict = {
+      'eth3d': ETH3D,
       'blender': Blender,
       'llff': LLFF,
       'tat_nerfpp': TanksAndTemplesNerfPP,
@@ -502,6 +503,61 @@ class Dataset(threading.Thread, metaclass=abc.ABCMeta):
     cam_idx = self._test_camera_idx
     self._test_camera_idx = (self._test_camera_idx + 1) % self._n_examples
     return self.generate_ray_batch(cam_idx)
+
+
+
+class ETH3D(Dataset):
+  """ETH3D Dataset."""
+
+  def _load_renderings(self, config):
+    """Load images from disk."""
+    if config.render_path:
+      raise ValueError('render_path cannot be used for the blender dataset.')
+
+    if config.full_training:
+      transform_filename = f'transforms.json'
+    else:
+      if self.split != 'all':
+        transform_filename = f'transforms_{self.split}.json'
+      else:
+        transform_filename = f'transforms.json'
+
+    pose_file = path.join(self.data_dir, transform_filename)
+    with utils.open_file(pose_file, 'r') as fp:
+      meta = json.load(fp)
+    images = []
+    disp_images = []
+    normal_images = []
+    cams = []
+    for _, frame in enumerate(meta['frames']):
+      fprefix = os.path.join(self.data_dir, frame['file_path'])
+
+      def get_img(f):
+        image_path = os.path.join(self.data_dir, f)
+        image = utils.load_img(image_path)
+        if config.factor > 1:
+          image = lib_image.downsample(image, config.factor)
+        return image
+
+      image = get_img(frame['file_path']) / 255.
+      images.append(image)
+
+      if self._load_normals:
+        normal_image = get_img(frame['normal_path'])[..., :3] * 2. / 255. - 1.
+        normal_images.append(normal_image)
+
+      cams.append(np.array(frame['transform_matrix'], dtype=np.float32))
+
+    self.images = np.stack(images, axis=0)
+    if self._load_normals:
+      self.normal_images = np.stack(normal_images, axis=0)
+      self.alphas = np.ones_like(self.images[..., -1])
+
+    self.height, self.width = self.images.shape[1:3]
+    self.camtoworlds = np.stack(cams, axis=0)
+    self.focal = .5 * self.width / np.tan(.5 * float(meta['camera_angle_x']))
+    self.pixtocams = camera_utils.get_pixtocam(self.focal, self.width,
+                                               self.height)
 
 
 class Blender(Dataset):

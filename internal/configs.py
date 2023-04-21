@@ -76,6 +76,7 @@ class Config:
   vis_num_rays: int = 16  # The number of rays to visualize.
   # Decimate images for tensorboard (ie, x[::d, ::d]) to conserve memory usage.
   vis_decimate: int = 0
+  full_training: bool = False  # Set true for training with all views
 
   # Only used by train.py:
   max_steps: int = 250000  # The number of optimization steps.
