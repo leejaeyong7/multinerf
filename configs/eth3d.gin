@@ -1,7 +1,11 @@
 Config.dataset_loader = 'eth3d'
 Config.batching = 'single_image'
 Config.near = 0
+<<<<<<< HEAD
 Config.far = 3.46
+=======
+Config.far = 3
+>>>>>>> 7fcf2a2eae777c0be5d3e2dc7570788d8e6dc9c9
 Config.eval_render_interval = 5
 Config.data_loss_type = 'mse'
 Config.adam_eps = 1e-8
@@ -22,4 +26,8 @@ NerfMLP.disable_density_normals = True
 Config.distortion_loss_mult = 0.
 
 NerfMLP.max_deg_point = 16
+<<<<<<< HEAD
 PropMLP.max_deg_point = 16
+=======
+PropMLP.max_deg_point = 16
+>>>>>>> 7fcf2a2eae777c0be5d3e2dc7570788d8e6dc9c9
